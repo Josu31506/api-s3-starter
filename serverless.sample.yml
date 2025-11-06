@@ -1,0 +1,63 @@
+
+service: api-s3
+
+provider:
+  name: aws
+  runtime: python3.11
+  region: ${opt:region, 'us-east-1'}
+  stage: ${opt:stage, 'dev'}
+  httpApi:
+    cors: true
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:ListAllMyBuckets
+        - s3:CreateBucket
+      Resource: "*"
+    - Effect: Allow
+      Action:
+        - s3:ListBucket
+      Resource: "arn:aws:s3:::*"
+    - Effect: Allow
+      Action:
+        - s3:PutObject
+        - s3:GetObject
+      Resource: "arn:aws:s3:::*/*"
+
+functions:
+  listaBuckets:
+    handler: handlers/lista_buckets.lambda_handler
+    events:
+      - httpApi:
+          path: /s3/lista-buckets
+          method: GET
+
+  listaObjetosBucket:
+    handler: handlers/lista_objetos_bucket.lambda_handler
+    events:
+      - httpApi:
+          path: /s3/bucket/lista-objetos
+          method: POST
+
+  crearBucket:
+    handler: handlers/crear_bucket.lambda_handler
+    events:
+      - httpApi:
+          path: /s3/crear-bucket
+          method: POST
+
+  crearDirectorio:
+    handler: handlers/crear_directorio.lambda_handler
+    events:
+      - httpApi:
+          path: /s3/crear-directorio
+          method: POST
+
+  subirArchivo:
+    handler: handlers/subir_archivo.lambda_handler
+    timeout: 20
+    events:
+      - httpApi:
+          path: /s3/subir-archivo
+          method: POST
