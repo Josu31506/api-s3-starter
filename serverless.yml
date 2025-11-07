@@ -1,0 +1,69 @@
+service: api-s3
+
+org: geraldocolchado
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: python3.11
+  region: ${env:AWS_REGION, 'us-east-1'}
+  memorySize: 256
+  timeout: 20
+  iam:
+    role: arn:aws:iam::447891120606:role/LabRole  # Ajusta si usas otro rol
+
+functions:
+  lista_buckets:
+    handler: lista_buckets.lambda_handler
+    memorySize: 512
+    events:
+      - http:
+          path: /s3/lista-buckets
+          method: get
+          cors: true
+          integration: lambda
+
+  lista_objetos_bucket:
+    handler: lista_objetos_bucket.lambda_handler
+    events:
+      - http:
+          path: /s3/bucket/lista-objetos
+          method: post
+          cors: true
+          integration: lambda
+
+  crear_bucket:
+    handler: crear_bucket.lambda_handler
+    events:
+      - http:
+          path: /s3/bucket/crear
+          method: post
+          cors: true
+          integration: lambda
+
+  crear_directorio:
+    handler: crear_directorio.lambda_handler
+    events:
+      - http:
+          path: /s3/bucket/crear-directorio
+          method: post
+          cors: true
+          integration: lambda
+
+  subir_archivo_base64:
+    handler: subir_archivo_base64.lambda_handler
+    timeout: 60
+    memorySize: 512
+    events:
+      - http:
+          path: /s3/bucket/subir-archivo
+          method: post
+          cors: true
+          integration: lambda
+
+package:
+  patterns:
+    - '!node_modules/**'
+    - '!venv/**'
+    - '!__pycache__/**'
+    - '*.py'
